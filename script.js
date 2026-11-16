@@ -1,0 +1,373 @@
+/* ICONS */
+const ICON_PATHS = {
+  moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
+  calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/>',
+  bell: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
+  book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+  database: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>',
+  heart: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/>',
+  signout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/>',
+  banknote: '<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>',
+  smile: '<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01M15 9h.01"/>',
+  switch: '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>'
+};
+
+function icon(name) {
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON_PATHS[name]}</svg>`;
+}
+
+document.querySelectorAll('[data-icon]').forEach(el => {
+  el.innerHTML = icon(el.dataset.icon);
+});
+
+/* CARD DATA */
+const PLACEHOLDER_URL = 'https://www.google.com';
+
+const CATEGORIES = [
+  { id: 'academics', title: 'Academics' },
+  { id: 'services', title: 'Student Services' },
+  { id: 'misc', title: 'Miscellaneous' }
+];
+
+const CARDS = [
+  {
+    id: 'financial-aid', category: 'services', icon: 'database', title: 'Financial Aid',
+    desc: 'Find Scholarship Offers, Financial Aid Agreement and History, and other resources.',
+    links: ['Link #1', 'Link #2', 'Link #3', 'Link #4']
+  },
+  {
+    id: 'student-info', category: 'services', icon: 'book', title: 'Student Information',
+    desc: 'Find your Student Profile, update Personal Information, and access your Direct Deposit.',
+    links: ['View Student Profile', 'Edit Personal Information', 'Direct Deposit', 'Link #4']
+  },
+  {
+    id: 'degreeworks', category: 'academics', icon: 'book', title: 'DegreeWorks',
+    desc: 'Access DegreeWorks to check your graduation status.',
+    button: { label: 'DegreeWorks', url: "https://degreeworksprd.rpi.edu:8708/degwx/RespDashboard/" },
+    flippable: false
+  },
+  {
+    id: 'direct-deposit', category: 'services', icon: 'banknote', title: 'Direct Deposit',
+    desc: 'Set up or update your Direct Deposit information.',
+    button: { label: 'Direct Deposit', url: '#' },
+    flippable: false,
+    roles: ['Staff']
+  },
+  {
+    id: 'forms', category: 'misc', icon: 'book', title: 'Forms',
+    desc: 'Find forms: Semester Away, Pathway Concentration Selection, and Laptop Ordering & Status',
+    links: ['Link #1', 'Link #2', 'Link #3', 'Link #4']
+  },
+  {
+    id: 'miscellaneous', category: 'misc', icon: 'book', title: 'Miscellaneous',
+    desc: 'Find random things?',
+    links: ['Link #1', 'Link #2', 'Link #3', 'Link #4']
+  }
+];
+
+/* FAVORITES */
+const FAV_KEY = 'sis-favorites';
+const DEFAULT_FAVORITES = ['financial-aid', 'student-info', 'degreeworks'];
+
+function loadFavorites() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(FAV_KEY));
+    if (Array.isArray(saved)) return saved.filter(id => CARDS.some(c => c.id === id));
+  } catch (e) {}
+  return [...DEFAULT_FAVORITES];
+}
+
+function saveFavorites() {
+  try { localStorage.setItem(FAV_KEY, JSON.stringify(favorites)); } catch (e) {}
+}
+
+let favorites = loadFavorites();
+let currentRole = 'Student';
+
+// CARD ROLES
+function isVisible(card) {
+  return !card.roles || card.roles.includes(currentRole);
+}
+const flipped = new Set(); // remembers which cards are flipped
+
+/* RENDERING */
+function heartButton(card) {
+  const fav = favorites.includes(card.id);
+  const label = fav ? `Remove ${card.title} from favorites` : `Add ${card.title} to favorites`;
+  return `<button class="heart" type="button" aria-pressed="${fav}" aria-label="${label}">${icon('heart')}</button>`;
+}
+
+function cardHTML(card, scope) {
+  const key = `${scope}:${card.id}`;
+  const canFlip = card.flippable !== false;
+  const isFlipped = canFlip && flipped.has(key);
+  const button = card.button
+    ? `<a class="card-btn" href="${card.button.url}" target="_blank" rel="noopener">${card.button.label}</a>`
+    : '';
+
+  const front = `
+        <div class="card-face card-front"${isFlipped ? ' inert' : ''}>
+          <div class="card-body">
+            ${heartButton(card)}
+            <h3 class="card-title">${icon(card.icon)}${card.title}</h3>
+            <p class="card-desc">${card.desc}</p>
+            ${button}
+          </div>
+        </div>`;
+
+  if (!canFlip) {
+    return `
+    <div class="card no-flip" data-id="${card.id}" data-key="${key}">
+      <div class="card-inner">${front}
+      </div>
+    </div>`;
+  }
+
+  const links = card.links
+    .map(text => `<li><a href="${PLACEHOLDER_URL}" target="_blank" rel="noopener">${text}</a></li>`)
+    .join('');
+
+  return `
+    <div class="card${isFlipped ? ' flipped' : ''}" data-id="${card.id}" data-key="${key}" tabindex="0"
+         aria-label="${card.title}. Press Enter to flip.">
+      <div class="card-inner">${front}
+        <div class="card-face card-back"${isFlipped ? '' : ' inert'}>
+          <div class="card-body">
+            ${heartButton(card)}
+            <h3 class="back-title">${card.title}</h3>
+            <ul class="back-links">${links}</ul>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderFavorites() {
+  const grid = document.getElementById('favorites-grid');
+  const favCards = favorites.map(id => CARDS.find(c => c.id === id)).filter(c => c && isVisible(c));
+  if (favCards.length === 0) {
+    grid.innerHTML = '<p class="empty-msg">Heart a block to pin it here.</p>';
+  } else {
+    grid.innerHTML = favCards.map(c => cardHTML(c, 'fav')).join('');
+  }
+}
+
+function renderCategories() {
+  document.getElementById('categories').innerHTML = CATEGORIES.map(cat => {
+    const cards = CARDS.filter(c => c.category === cat.id && isVisible(c));
+    if (cards.length === 0) return '';
+    return `
+      <section class="section">
+        <h2 class="section-title">${cat.title}</h2>
+        <div class="card-grid">${cards.map(c => cardHTML(c, cat.id)).join('')}</div>
+      </section>`;
+  }).join('');
+}
+
+/* Update every heart without re-rendering card */
+function updateHearts(id) {
+  const card = CARDS.find(c => c.id === id);
+  const fav = favorites.includes(id);
+  document.querySelectorAll(`.card[data-id="${id}"] .heart`).forEach(btn => {
+    btn.setAttribute('aria-pressed', fav);
+    btn.setAttribute('aria-label', fav ? `Remove ${card.title} from favorites` : `Add ${card.title} to favorites`);
+  });
+}
+
+function toggleFavorite(id) {
+  favorites = favorites.includes(id)
+    ? favorites.filter(f => f !== id)
+    : [...favorites, id];
+  saveFavorites();
+  renderFavorites();
+  updateHearts(id);
+}
+
+function toggleFlip(cardEl) {
+  const isFlipped = cardEl.classList.toggle('flipped');
+  const front = cardEl.querySelector('.card-front');
+  const back = cardEl.querySelector('.card-back');
+  front.inert = isFlipped;
+  back.inert = !isFlipped;
+  if (isFlipped) flipped.add(cardEl.dataset.key);
+  else flipped.delete(cardEl.dataset.key);
+}
+
+renderFavorites();
+renderCategories();
+
+/* CARD INTERACTIONS */
+const content = document.getElementById('content');
+
+content.addEventListener('click', e => {
+  const heart = e.target.closest('.heart');
+  if (heart) {
+    toggleFavorite(heart.closest('.card').dataset.id);
+    return;
+  }
+  // links and the DegreeWorks button navigate instead of flipping
+  if (e.target.closest('a')) return;
+
+  const card = e.target.closest('.card');
+  if (card && !card.classList.contains('no-flip')) toggleFlip(card);
+});
+
+content.addEventListener('keydown', e => {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('card')) {
+    e.preventDefault();
+    toggleFlip(e.target);
+  }
+});
+
+/* TABS */
+const tabs = document.querySelectorAll('.tab');
+
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => {
+      t.classList.remove('active');
+      t.setAttribute('aria-selected', 'false');
+      document.getElementById(t.dataset.panel).hidden = true;
+    });
+    tab.classList.add('active');
+    tab.setAttribute('aria-selected', 'true');
+    document.getElementById(tab.dataset.panel).hidden = false;
+    content.scrollTop = 0;
+  });
+});
+
+/* PROFILE MENU */
+const avatarBtn = document.getElementById('avatarBtn');
+const profileMenu = document.getElementById('profileMenu');
+
+function setMenu(open) {
+  profileMenu.classList.toggle('open', open);
+  avatarBtn.setAttribute('aria-expanded', open);
+}
+
+avatarBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  setMenu(!profileMenu.classList.contains('open'));
+});
+
+const roleName = document.getElementById('roleName');
+
+profileMenu.addEventListener('click', e => {
+  // Role item: switch between Student and Staff, keep the menu open
+  if (e.target.closest('#roleBtn')) {
+    currentRole = currentRole === 'Student' ? 'Staff' : 'Student';
+    roleName.textContent = currentRole;
+    // re-draw the cards so role-only cards appear or disappear
+    renderFavorites();
+    renderCategories();
+    return;
+  }
+  if (e.target.closest('.menu-item')) setMenu(false); // other actions not wired yet
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.profile')) setMenu(false);
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') setMenu(false);
+});
+
+/* DARK MODE TOGGLE */
+const DARK_KEY = 'sis-dark';
+const darkToggle = document.getElementById('darkToggle');
+
+function applyDark(on) {
+  document.documentElement.classList.toggle('dark', on);
+  darkToggle.setAttribute('aria-pressed', on);
+}
+
+try { applyDark(localStorage.getItem(DARK_KEY) === '1'); } catch (e) {}
+
+darkToggle.addEventListener('click', () => {
+  const on = !document.documentElement.classList.contains('dark');
+  applyDark(on);
+  try { localStorage.setItem(DARK_KEY, on ? '1' : '0'); } catch (e) {}
+});
+
+/* WEEKLY SCHEDULE */
+// Hours = 24h decimals (14.5 = 2:30pm)
+// Days: 0-4 = Mon-Fri
+const DAY_START = 7.5;  // 8am
+const DAY_END = 22.5;   // 10pm
+const EVENTS = [
+  { days: [0, 3], start: 8.5,  end: 10,    color: '#9ccf9a' },
+  { days: [1, 4], start: 12.2, end: 14,    color: '#a8a3d6' },
+  { days: [0, 3], start: 14.1, end: 15,    color: '#d6a3c8' },
+  { days: [2],    start: 18,   end: 19.75, color: '#d4d2a0' }
+];
+
+function renderWeek() {
+  const body = document.getElementById('weekBody');
+  const height = 280;
+  const pxPerHour = height / (DAY_END - DAY_START);
+  const y = hour => (hour - DAY_START) * pxPerHour;
+
+  let timeCol = '<div class="time-col">';
+  let lines = '';
+  for (let h = 8; h <= 22; h += 2) {
+    const label = h === 12 ? '12pm' : h < 12 ? `${h}am` : `${h - 12}pm`;
+    timeCol += `<span class="time-label" style="top:${y(h) - 12}px">${label}</span>`;
+    lines += `<div class="hour-line" style="top:${y(h)}px"></div>`;
+  }
+  timeCol += '</div>';
+
+  let days = '';
+  for (let d = 0; d < 5; d++) {
+    const events = EVENTS
+      .filter(ev => ev.days.includes(d))
+      .map(ev => `<div class="event" style="top:${y(ev.start)}px;height:${(ev.end - ev.start) * pxPerHour}px;background:${ev.color}"></div>`)
+      .join('');
+    days += `<div class="day-col">${events}</div>`;
+  }
+
+  body.innerHTML = timeCol + days + lines;
+}
+
+renderWeek();
+
+/* UPCOMING CALENDAR DATES */
+// Shows the next 3 events, based on the current
+// "date" is the text shown on the site, while "start"/"end" are used for chronological sort
+const UPCOMING_COUNT = 3;
+
+function toLocalDate(iso) {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function renderUpcoming(events) {
+  const box = document.getElementById('upcomingDates');
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const next = events
+    .filter(ev => toLocalDate(ev.end || ev.start) >= today)
+    .sort((a, b) => toLocalDate(a.start) - toLocalDate(b.start))
+    .slice(0, UPCOMING_COUNT);
+
+  box.innerHTML = next.length
+    ? next.map(ev => `<div class="date-row"><span>${ev.date}</span><span>${ev.description}</span></div>`).join('')
+    : '<div class="date-row"><span></span><span>No upcoming events.</span></div>';
+}
+
+fetch('data/calendar_events.json')
+  .then(res => res.json())
+  .then(renderUpcoming)
+  .catch(() => {
+    document.getElementById('upcomingDates').innerHTML =
+      '<div class="date-row"><span></span><span>Could not load events.</span></div>';
+  });
+
+/* PLACEHOLDER LINKS */
+document.addEventListener('click', e => {
+  const a = e.target.closest('a[href="#"]');
+  if (a) e.preventDefault();
+});
