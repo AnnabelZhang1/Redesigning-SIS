@@ -440,11 +440,14 @@ html.dark .menu-item:hover { background: rgba(255, 255, 255, 0.08); }
 
 .back-links { list-style: none; margin: 0; padding: 0; }
 
-.back-links a {
+/* plain text between links (e.g. "Laptop", "&") uses the link color, no underline */
+.back-links li {
   color: var(--link);
   font-size: 17px;
   line-height: 1.55;
 }
+
+.back-links a { color: var(--link); }
 
 /* SIDEBAR */
 .apps {

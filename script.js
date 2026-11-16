@@ -35,12 +35,19 @@ const CARDS = [
   {
     id: 'financial-aid', category: 'services', icon: 'database', title: 'Financial Aid',
     desc: 'Find Scholarship Offers, Financial Aid Agreement and History, and other resources.',
-    links: ['Link #1', 'Link #2', 'Link #3', 'Link #4']
+    links: [
+      { label: 'Financial Aid Offers & History', url: 'https://sis9.rpi.edu/StudentSelfService/ssb/financialAid#!/dashboard/home/' },
+      { label: 'Responsibility Agreement', url: 'https://sis-sso.rpi.edu/rss/ybwskfina.P_FinancialAgreement' }
+    ]
   },
   {
     id: 'student-info', category: 'services', icon: 'book', title: 'Student Information',
     desc: 'Find your Student Profile, update Personal Information, and access your Direct Deposit.',
-    links: ['View Student Profile', 'Edit Personal Information', 'Direct Deposit', 'Link #4']
+    links: [
+      { label: 'View Student Profile', url: 'https://sis9.rpi.edu/StudentSelfService/ssb/studentProfile' },
+      { label: 'Edit Personal Information', url: 'https://sis9.rpi.edu/BannerGeneralSsb/ssb/personalInformation#/personalInformationMain' },
+      { label: 'Direct Deposit', url: 'https://sis9.rpi.edu/BannerGeneralSsb/ssb/directDeposit' }
+    ]
   },
   {
     id: 'degreeworks', category: 'academics', icon: 'book', title: 'DegreeWorks',
@@ -49,21 +56,40 @@ const CARDS = [
     flippable: false
   },
   {
-    id: 'direct-deposit', category: 'services', icon: 'banknote', title: 'Direct Deposit',
-    desc: 'Set up or update your Direct Deposit information.',
-    button: { label: 'Direct Deposit', url: '#' },
-    flippable: false,
-    roles: ['Staff']
-  },
-  {
     id: 'forms', category: 'misc', icon: 'book', title: 'Forms',
     desc: 'Find forms: Semester Away, Pathway Concentration Selection, and Laptop Ordering & Status',
-    links: ['Link #1', 'Link #2', 'Link #3', 'Link #4']
+    links: [
+      { label: 'Semester Away Form', url: 'https://sis.rpi.edu/ssomanager/c/SSB?pkg=YHWSKTAWP.P_StudentTAWPForm' },
+      { label: 'Select Pathway Concentration', url: 'https://sis.rpi.edu/ssomanager/c/SSB?pkg=YHWSKPATH.P_PathwayForm' },
+      // a list (in [ ]) mixes plain text with links on one line
+      ['Laptop ',
+        { label: 'Order', url: 'https://sis-sso.rpi.edu/rss/hwsklptp.P_MCPOrderForm' },
+        ' & ',
+        { label: 'Status', url: 'https://sis-sso.rpi.edu/rss/hwsklptp.P_StuViewLptp' }]
+    ]
+  },
+  {
+    id: 'registration', category: 'academics', icon: 'book', title: 'Registration',
+    desc: 'Find forms: Semester Away, Pathway Concentration Selection, and Laptop Ordering & Status',
+    links: [
+      { label: 'Registration Dashboard', url: 'https://sis9.rpi.edu/StudentRegistrationSsb/ssb/registration' },
+      { label: 'Course Catalog (Fall 2026)', url: 'https://catalog.rpi.edu/' },
+      { label: 'Class Hour Schedule', url: 'https://registrar.rpi.edu/services/class-scheduling/class-offerings-and-schedule' },
+      { label: 'Testing Center', url: 'https://apex.cct.rpi.edu/apex/r/simon_apex/testing-center-schedule/' }
+    ]
   },
   {
     id: 'miscellaneous', category: 'misc', icon: 'book', title: 'Miscellaneous',
     desc: 'Find random things?',
-    links: ['Link #1', 'Link #2', 'Link #3', 'Link #4']
+    links: [
+      ['Commencement Policy (',
+        { label: 'UG', url: 'https://registrar.rpi.edu/services/degree-conferral/undergraduate-student-commencement-participation-policy' },
+        ', ',
+        { label: 'GR', url: 'https://registrar.rpi.edu/services/degree-conferral/graduate-student-commencement-participation-policy' },
+        ')'],
+      { label: 'RPI Alert', url: 'https://alert.rpi.edu/' },
+      { label: 'Parking', url: 'https://rpi.aimsparking.com/' }
+    ]
   }
 ];
 
@@ -125,8 +151,17 @@ function cardHTML(card, scope) {
     </div>`;
   }
 
+  const linkTag = (label, url) => `<a href="${url}" target="_blank" rel="noopener">${label}</a>`;
+
   const links = card.links
-    .map(text => `<li><a href="${PLACEHOLDER_URL}" target="_blank" rel="noopener">${text}</a></li>`)
+    .map(item => {
+      if (typeof item === 'string') return `<li>${linkTag(item, PLACEHOLDER_URL)}</li>`;
+      if (Array.isArray(item)) {
+        const parts = item.map(part => typeof part === 'string' ? part : linkTag(part.label, part.url));
+        return `<li>${parts.join('')}</li>`;
+      }
+      return `<li>${linkTag(item.label, item.url)}</li>`;
+    })
     .join('');
 
   return `
