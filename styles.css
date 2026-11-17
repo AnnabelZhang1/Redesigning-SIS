@@ -1,12 +1,14 @@
 /* COLORS + SIZES */
 :root {
   --red: #d6001c;
-  --page-bg: #ffffff;
+  --header-bg: #d6001c;      /* top bar */
+  --page-bg: #e7e7e7;
   --text: #000000;
   --muted: #9e9e9e;
   --border: #000000;
   --card-bg: #ffffff;
-  --tab-bg: #ffffff;
+  --box-bg: #ffffff;         /* sidebar boxes (schedule, dates, registration) */
+  --tab-bg: #e7e7e7;
   --link: #1a56c9;
   --btn-bg: #d4d4d4;
   --menu-bg: #c9c9c9;
@@ -37,7 +39,7 @@
 
   --tab-height: 36px;
   --tab-height-active: 46px;
-  --sidebar-width: 440px;
+  --sidebar-width: clamp(440px, 26vw, 600px);  /* grows with the window: min 440px, max 600px */
   --side-margin: 60px;       /* left/right page margin for header, tabs, content and sidebar */
 }
 
@@ -45,37 +47,36 @@
 html.dark {
   color-scheme: dark;
   --red: #b3001b;
+  --header-bg: #171719;
   --red-text: #ff5c6e;
-  --page-bg: #121212;
-  --text: #e8e8e8;
+  --page-bg: #353535;
+  --text: #ccc6c6;
   --muted: #9a9a9a;
   --border: #bdbdbd;
   --card-bg: #1e1e1e;
-  --tab-bg: #1e1e1e;
+  --box-bg: #1e1e1e;
+  --tab-bg: #353535;
   --link: #82b1ff;
   --btn-bg: #3a3a3a;
-  --btn-text: #e8e8e8;
+  --btn-text: #ccc6c6;
   --btn-border: #888888;
   --menu-bg: #2c2c2c;
   --menu-line: #777777;
   --app-tile: #4a4a4a;
   --hover-bg: #262626;
   --avatar-bg: #1e1e1e;
-  --avatar-text: #e8e8e8;
+  --avatar-text: #ccc6c6;
   --input-line: #8a8a8a;
   --icon-muted: #b0b0b0;
   --grid-line: #3a3a3a;
   --grid-dash: #555555;
   --grid-axis: #8a8a8a;
   --time-text: #b0b0b0;
-  --tooltip-bg: #e8e8e8;
+  --tooltip-bg: #ccc6c6;
   --tooltip-text: #121212;
-  --tab-shadow: rgba(255, 255, 255, 0.22);
+  --tab-shadow: rgba(0, 0, 0, 0.7);
   --icon-off-fill: #8f8f8f;
   --icon-off-stroke: #5a5a5a;
-  --etile-bg: #3a3a3a;
-  --etile-border: #e8e8e8;
-  --etile-text: #e8e8e8;
 }
 
 * { box-sizing: border-box; }
@@ -99,7 +100,7 @@ button { font-family: inherit; color: inherit; }
 .topbar {
   flex-shrink: 0;
   height: 116px;
-  background: var(--red);
+  background: var(--header-bg);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -220,6 +221,35 @@ html.dark .menu-item:hover { background: rgba(255, 255, 255, 0.08); }
 .menu-item svg { width: 24px; height: 24px; stroke-width: 1.5; flex-shrink: 0; }
 
 .menu-item strong { font-weight: 700; }
+
+/* View Profile and Sign Out: greyed out, message on hover (shown to the left of the menu) */
+.menu-item--off {
+  position: relative;
+  cursor: not-allowed;
+}
+
+.menu-item--off > * { opacity: 0.45; }
+
+.menu-item--off::after {
+  content: attr(data-tip);
+  display: none;
+  position: absolute;
+  right: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: max-content;
+  padding: 8px 12px;
+  background: var(--tooltip-bg);
+  color: var(--tooltip-text);
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.4;
+  pointer-events: none;
+}
+
+.menu-item--off:hover::after,
+.menu-item--off:focus-visible::after { display: block; }
 
 .menu-sep { height: 2px; margin: 0 16px; background: var(--menu-line); }
 
@@ -438,13 +468,36 @@ html.dark .menu-item:hover { background: rgba(255, 255, 255, 0.08); }
   text-align: center;
 }
 
-.back-links { list-style: none; margin: 0; padding: 0; }
+/* Back of the card: title stays put, link list scrolls when there are more links than fit */
+.card-back .card-body {
+  display: flex;
+  flex-direction: column;
+}
 
-/* plain text between links (e.g. "Laptop", "&") uses the link color, no underline */
+.back-links {
+  list-style: none;
+  margin: 0;
+  padding: 0 4px 0 0;
+  flex: 1;
+  min-height: 0;               /* lets the list shrink so it can scroll */
+  overflow-y: auto;
+  overscroll-behavior: contain; /* scrolling the list doesn't scroll the page */
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted) transparent;
+}
+
+/* The card body is a "container" so text inside can size itself to the card's width (cqi units) */
+.card-body { container-type: inline-size; }
+
+/* plain text between links (e.g. "Laptop", "&") uses the link color, no underline.
+   Font shrinks with the card (6.2% of its width, between 11px and 17px) so each link stays on one line */
 .back-links li {
   color: var(--link);
-  font-size: 17px;
+  font-size: clamp(11px, 6.2cqi, 17px);
   line-height: 1.55;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;   /* last resort: "..." instead of wrapping on very narrow cards */
 }
 
 .back-links a { color: var(--link); }
@@ -499,7 +552,10 @@ html.dark .menu-item:hover { background: rgba(255, 255, 255, 0.08); }
 }
 
 /* SCHEDULE AND CALENDAR BOXES */
-.schedule-box { border: 2px solid var(--border); }
+.schedule-box {
+  border: 2px solid var(--border);
+  background: var(--box-bg);
+}
 
 .week, .dates {
   display: block;
@@ -532,7 +588,7 @@ html.dark .menu-item:hover { background: rgba(255, 255, 255, 0.08); }
 .time-label {
   position: absolute;
   left: 3px;
-  font-size: 9px;
+  font-size: clamp(9px, 0.55vw, 11px);
   color: var(--time-text);
 }
 
@@ -559,12 +615,12 @@ html.dark .menu-item:hover { background: rgba(255, 255, 255, 0.08); }
 .dates {
   border-top: 2px solid var(--border);
   padding: 6px 10px 8px;
-  font-size: 13px;
+  font-size: clamp(13px, 0.8vw, 16px);
 }
 
 .dates h3 {
   margin: 0 0 6px;
-  font-size: 13px;
+  font-size: clamp(13px, 0.8vw, 16px);
   font-weight: 500;
   text-align: center;
 }
@@ -579,7 +635,8 @@ html.dark .menu-item:hover { background: rgba(255, 255, 255, 0.08); }
   margin-top: 34px;
   padding: 10px 12px;
   border: 2px solid var(--border);
-  font-size: 19px;
+  background: var(--box-bg);
+  font-size: clamp(19px, 1.1vw, 22px);
   font-weight: 300;
 }
 
@@ -735,4 +792,4 @@ body:has(#panel-registration:not([hidden])) .apps { display: none; }
   width: 34px;
   height: 34px;
   stroke-width: 1.8;
-}
+} 

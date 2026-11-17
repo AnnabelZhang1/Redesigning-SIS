@@ -11,7 +11,7 @@
 
   <!-- HEADER -->
   <header class="topbar">
-    <img class="logo" src="images/logos/rpi_logo.png" alt="RPI">
+    <img class="logo" id="logo" src="images/logos/rpi_logo.png" data-light-src="images/logos/rpi_logo.png" data-dark-src="images/logos/rpi_logo_white.png" alt="RPI">
 
     <div class="header-actions">
       <button class="icon-btn" id="darkToggle" type="button" aria-pressed="false" aria-label="Toggle dark mode" data-icon="moon"></button>
@@ -21,9 +21,9 @@
       <div class="profile">
         <button class="avatar" id="avatarBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Account menu">A</button>
         <div class="profile-menu" id="profileMenu" role="menu">
-          <button class="menu-item" role="menuitem" type="button"><span data-icon="user"></span>View Profile</button>
+          <button class="menu-item menu-item--off" role="menuitem" type="button" aria-disabled="true" data-tip="Feature intentionally not implemented."><span data-icon="user"></span>View Profile</button>
           <div class="menu-sep"></div>
-          <button class="menu-item" role="menuitem" type="button"><span data-icon="signout"></span>Sign Out</button>
+          <button class="menu-item menu-item--off" role="menuitem" type="button" aria-disabled="true" data-tip="Feature intentionally not implemented."><span data-icon="signout"></span>Sign Out</button>
           <div class="menu-sep"></div>
           <button class="menu-item" id="roleBtn" role="menuitem" type="button"><span data-icon="switch"></span><span>Current Role: <strong id="roleName">Student</strong></span></button>
         </div>
@@ -82,7 +82,7 @@
           <h2>Registration and Classes</h2>
           <ul>
             <li>[Hub specific advising link, if available]</a></li>
-            <li><a href="#">RPI Course Catalog</a>
+            <li><a href="https://catalog.rpi.edu/">RPI Course Catalog</a>
               <span class="info" tabindex="0" aria-label="Make sure to select your incoming year to check degree requirements">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-5M12 8h.01"/></svg>
                 <span class="info-tip" role="tooltip">Make sure to select your incoming year to see accurate degree requirements.</span>

@@ -10,6 +10,7 @@ const ICON_PATHS = {
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/>',
   signout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/>',
   banknote: '<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>',
+  dollar: '<rect x="2" y="5" width="20" height="14" rx="1.5"/><circle cx="12" cy="12" r="5"/><path d="M13.8 10.1c-.4-.6-1-.9-1.8-.9-1 0-1.8.6-1.8 1.4 0 1.9 3.6 1 3.6 3 0 .8-.8 1.4-1.8 1.4-.9 0-1.6-.4-1.9-1.1M12 8v8"/>',
   smile: '<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01M15 9h.01"/>',
   switch: '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>'
 };
@@ -33,11 +34,14 @@ const CATEGORIES = [
 
 const CARDS = [
   {
-    id: 'financial-aid', category: 'services', icon: 'database', title: 'Financial Aid',
-    desc: 'Find Scholarship Offers, Financial Aid Agreement and History, and other resources.',
+    id: 'financial-aid', category: 'services', icon: 'dollar', title: 'Tuition & Financial Aid',
+    desc: 'Find Account Summary, Scholarship Offers, Financial Aid Agreement and History, and other resources.',
     links: [
+      { label: 'Tuition Account Summary', url: 'https://sis9.rpi.edu/StudentSelfService/ssb/accountSummary#!/' },
       { label: 'Financial Aid Offers & History', url: 'https://sis9.rpi.edu/StudentSelfService/ssb/financialAid#!/dashboard/home/' },
-      { label: 'Responsibility Agreement', url: 'https://sis-sso.rpi.edu/rss/ybwskfina.P_FinancialAgreement' }
+      { label: 'Responsibility Agreement', url: 'https://sis-sso.rpi.edu/rss/ybwskfina.P_FinancialAgreement' },
+      { label: 'Understanding Financial Aid Awards', url: 'https://financialaid.rpi.edu/student-guide-financial-aid/understanding-your-financial-aid-awards-and-billing' },
+      { label: 'Payment Options', url: 'https://financialaid.rpi.edu/cost-attendance/payment-options' }
     ]
   },
   {
@@ -46,6 +50,19 @@ const CARDS = [
     links: [
       { label: 'View Student Profile', url: 'https://sis9.rpi.edu/StudentSelfService/ssb/studentProfile' },
       { label: 'Edit Personal Information', url: 'https://sis9.rpi.edu/BannerGeneralSsb/ssb/personalInformation#/personalInformationMain' },
+      { label: 'Direct Deposit', url: 'https://sis9.rpi.edu/BannerGeneralSsb/ssb/directDeposit' }
+    ]
+  },
+  {
+    id: 'course-forms', category: 'services', icon: 'book', title: 'Course-related Forms',
+    desc: 'Find your Student Profile, update Personal Information, and access your Direct Deposit.',
+    links: [
+      { label: 'Add/Drop Course', url: 'https://registrar.rpi.edu/services/course-registration/add-or-drop-course' },
+      ['Declare/Change Your ',
+        { label: 'Major', url: 'https://registrar.rpi.edu/services/academic-planning/declaring-or-change-major' },
+        ' or ',
+        { label: 'Minor', url: 'https://registrar.rpi.edu/services/academic-planning/declare-minor' }
+      ],
       { label: 'Direct Deposit', url: 'https://sis9.rpi.edu/BannerGeneralSsb/ssb/directDeposit' }
     ]
   },
@@ -61,11 +78,11 @@ const CARDS = [
     links: [
       { label: 'Semester Away Form', url: 'https://sis.rpi.edu/ssomanager/c/SSB?pkg=YHWSKTAWP.P_StudentTAWPForm' },
       { label: 'Select Pathway Concentration', url: 'https://sis.rpi.edu/ssomanager/c/SSB?pkg=YHWSKPATH.P_PathwayForm' },
-      // a list (in [ ]) mixes plain text with links on one line
       ['Laptop ',
         { label: 'Order', url: 'https://sis-sso.rpi.edu/rss/hwsklptp.P_MCPOrderForm' },
         ' & ',
-        { label: 'Status', url: 'https://sis-sso.rpi.edu/rss/hwsklptp.P_StuViewLptp' }]
+        { label: 'Status', url: 'https://sis-sso.rpi.edu/rss/hwsklptp.P_StuViewLptp' }
+      ]
     ]
   },
   {
@@ -73,7 +90,7 @@ const CARDS = [
     desc: 'Find forms: Semester Away, Pathway Concentration Selection, and Laptop Ordering & Status',
     links: [
       { label: 'Registration Dashboard', url: 'https://sis9.rpi.edu/StudentRegistrationSsb/ssb/registration' },
-      { label: 'Course Catalog (Fall 2026)', url: 'https://catalog.rpi.edu/' },
+      [ { label: 'Course Catalog', url: 'https://catalog.rpi.edu/' }, ' (Fall 2026) ' ],
       { label: 'Class Hour Schedule', url: 'https://registrar.rpi.edu/services/class-scheduling/class-offerings-and-schedule' },
       { label: 'Testing Center', url: 'https://apex.cct.rpi.edu/apex/r/simon_apex/testing-center-schedule/' }
     ]
@@ -290,6 +307,8 @@ avatarBtn.addEventListener('click', e => {
 const roleName = document.getElementById('roleName');
 
 profileMenu.addEventListener('click', e => {
+  // Disabled items (View Profile, Sign Out): do nothing, keep the menu open
+  if (e.target.closest('.menu-item--off')) return;
   // Role item: switch between Student and Staff, keep the menu open
   if (e.target.closest('#roleBtn')) {
     currentRole = currentRole === 'Student' ? 'Staff' : 'Student';
@@ -314,9 +333,13 @@ document.addEventListener('keydown', e => {
 const DARK_KEY = 'sis-dark';
 const darkToggle = document.getElementById('darkToggle');
 
+const logo = document.getElementById('logo');
+
 function applyDark(on) {
   document.documentElement.classList.toggle('dark', on);
   darkToggle.setAttribute('aria-pressed', on);
+  // swap to the white logo in dark mode
+  logo.src = on ? logo.dataset.darkSrc : logo.dataset.lightSrc;
 }
 
 try { applyDark(localStorage.getItem(DARK_KEY) === '1'); } catch (e) {}
