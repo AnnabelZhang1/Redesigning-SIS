@@ -55,7 +55,7 @@ const CARDS = [
   },
   {
     id: 'course-forms', category: 'services', icon: 'book', title: 'Course-related Forms',
-    desc: 'Find your Student Profile, update Personal Information, and access your Direct Deposit.',
+    desc: 'Find forms for course and Major/Minor changes.',
     links: [
       { label: 'Add/Drop Course', url: 'https://registrar.rpi.edu/services/course-registration/add-or-drop-course' },
       ['Declare/Change Your ',
@@ -63,7 +63,7 @@ const CARDS = [
         ' or ',
         { label: 'Minor', url: 'https://registrar.rpi.edu/services/academic-planning/declare-minor' }
       ],
-      { label: 'Direct Deposit', url: 'https://sis9.rpi.edu/BannerGeneralSsb/ssb/directDeposit' }
+
     ]
   },
   {
