@@ -291,6 +291,9 @@ function showTab(panelId) {
   // the sidebar schedule is only a link when you're not already on Registration
   const weekEl = document.getElementById('weekLink');
   if (weekEl) weekEl.tabIndex = panelId === 'panel-registration' ? -1 : 0;
+  // same for the holds number in the sidebar box
+  const holdsEl = document.getElementById('sidebarHolds');
+  if (holdsEl) holdsEl.tabIndex = panelId === 'panel-registration' ? -1 : 0;
   // start downloading course data early so Build Schedule is quick
   if (panelId === 'panel-registration') loadSections().catch(() => {});
 }
@@ -537,6 +540,14 @@ weekLink.addEventListener('click', e => {
   if (onRegistration()) return;
   showTab('panel-registration');
   document.getElementById('crnInput').focus();
+});
+
+// The holds number in the sidebar box also opens the Registration tab
+// (on the Registration tab itself it's plain text)
+document.getElementById('sidebarHolds').addEventListener('click', e => {
+  e.preventDefault();
+  if (onRegistration()) return;
+  showTab('panel-registration');
 });
 
 /* REGISTRATION: CRN BUILDER */

@@ -735,6 +735,12 @@ body:has(#panel-registration:not([hidden])) .week:hover { background: none; }
 .export-sheet .event-time { font-weight: 400; }
 .export-sheet .event-room { font-weight: 400; text-decoration: underline; }
 
+/* On the Registration tab, the sidebar's holds number isn't a link */
+body:has(#panel-registration:not([hidden])) #sidebarHolds {
+  text-decoration: none;
+  cursor: default;
+}
+
 /* REGISTRATION: HOLDS */
 .holds-line { margin: 0; font-size: 20px; font-weight: 300; }
 
