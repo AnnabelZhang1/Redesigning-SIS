@@ -57,7 +57,7 @@ const CARDS = [
     ]
   },
   {
-    id: 'course-forms', category: 'services', icon: 'book', title: 'Course-Related Forms',
+    id: 'course-forms', category: 'services', icon: 'document', title: 'Course-Related Forms',
     desc: 'Find forms for course add/drop and Major/Minor changes.',
     links: [
       { label: 'Add/Drop Course', url: 'https://registrar.rpi.edu/services/course-registration/add-or-drop-course' },
