@@ -57,7 +57,33 @@
       </div>
 
       <div id="panel-registration" role="tabpanel" hidden>
-        <p class="placeholder">Registration page coming soon.</p>
+        <section class="section">
+          <h2 class="section-title">Registration Holds</h2>
+          <p class="holds-line">You have <a class="holds-count" aria-label="0 registration holds, view details">0</a> registration holds.</p>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title section-title--with-info">
+            <span>Register For Courses <span class="term" id="termName"></span></span>
+            <span class="info info--left" tabindex="0" aria-label="Full course search intentionally not implemented. This is mainly for schedule visualization.">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-5M12 8h.01"/></svg>
+              <span class="info-tip" role="tooltip">Full course search intentionally not implemented. This is mainly for schedule visualization.</span>
+            </span>
+          </h2>
+          <p class="builder-help">Enter the CRNs of your classes, separated by commas or spaces, then press Enter or Build Schedule. Your schedule appears on the right.</p>
+
+          <div class="crn-row">
+            <input id="crnInput" class="crn-input" type="text" inputmode="numeric" autocomplete="off" placeholder="e.g. 12345, 23456" aria-label="CRNs">
+            <button id="crnSubmit" class="builder-btn builder-btn--primary" type="button">Build Schedule</button>
+            <button id="useGeneric" class="builder-btn" type="button">Use Generic</button>
+            <button id="downloadBtn" class="builder-btn builder-btn--download" type="button" disabled>Download Schedule</button>
+          </div>
+
+          <div id="crnMessage" class="crn-message" role="status" hidden></div>
+
+          <h3 class="builder-subtitle">Registered Courses</h3>
+          <ul id="courseList" class="course-list"></ul>
+        </section>
       </div>
 
       <div id="panel-resources" role="tabpanel" hidden>
@@ -82,7 +108,7 @@
           <h2>Registration and Classes</h2>
           <ul>
             <li>[Hub specific advising link, if available]</a></li>
-            <li><a href="https://catalog.rpi.edu/">RPI Course Catalog</a>
+            <li><a href="#">RPI Course Catalog</a>
               <span class="info" tabindex="0" aria-label="Make sure to select your incoming year to check degree requirements">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-5M12 8h.01"/></svg>
                 <span class="info-tip" role="tooltip">Make sure to select your incoming year to see accurate degree requirements.</span>
@@ -107,16 +133,20 @@
 
 
       <div class="schedule-box">
-        <a class="week" href="#weekly-schedule" aria-label="Open weekly schedule">
+        <!-- Weekly schedule: filled from the courses registered on the Registration tab; clicking opens that tab -->
+        <a class="week" id="weekLink" href="#" aria-label="Weekly schedule, open Registration">
           <div class="week-head">
             <span></span><span>M</span><span>T</span><span>W</span><span>R</span><span>F</span>
           </div>
-          <div class="week-body" id="weekBody"></div>
+          <div class="week-wrap">
+            <div class="week-body" id="weekBody"></div>
+            <div class="week-empty" id="weekEmpty">No courses registered.<br>Head to Registration.</div>
+          </div>
         </a>
 
         <!-- Upcoming dates: links to the academic calendar -->
-        <a class="dates" href="https://registrar.rpi.edu/academic-calendar" target="_blank" rel="noopener" aria-label="Open upcoming dates">
-          <h3>Upcoming Dates</h3>
+        <a class="dates" href="https://registrar.rpi.edu/academic-calendar" rel="noopener" aria-label="Open upcoming dates">
+          <h3>Upcoming Academic Dates</h3>
           <div id="upcomingDates"></div>
         </a>
       </div>
@@ -132,6 +162,9 @@
   <!-- SURVEY BUTTON -->
   <a class="fab" href="https://forms.gle/iESormQZooqkhUg3A" target="_blank" rel="noopener" aria-label="Give some feedback (opens feedback form)" data-tip="Give some feedback!" data-icon="smile"></a>
 
+  <!-- html2canvas: turns the schedule into a PNG for "Download Schedule" -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="data/building_abbreviations.js"></script>
   <script src="script.js?v=2"></script>
 
 </body>

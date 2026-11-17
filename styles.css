@@ -16,7 +16,7 @@
   --icon-fill: #ffffff;
   --icon-stroke: #1a1a1a;
   --app-tile: #6b6b6b;
-  --hover-bg: #f5f5f5;
+  --hover-bg: #ececec;       /* schedule + upcoming dates hover */
   --red-text: #d6001c;       /* holds */
   --avatar-bg: #ffffff;
   --avatar-text: #000000;
@@ -31,6 +31,8 @@
   --tooltip-bg: #333333;
   --tooltip-text: #ffffff;
   --tab-shadow: rgba(0, 0, 0, 0.35);
+  --tab-shadow-blur: 12px;
+  --tab-text: #000000;
   --icon-off-fill: #c4c4c4;  /* greyed-out header icons */
   --icon-off-stroke: #7a7a7a;
   --etile-bg: #d9d9d9;
@@ -63,7 +65,7 @@ html.dark {
   --menu-bg: #2c2c2c;
   --menu-line: #777777;
   --app-tile: #4a4a4a;
-  --hover-bg: #262626;
+  --hover-bg: #3a3a3a;
   --avatar-bg: #1e1e1e;
   --avatar-text: #ccc6c6;
   --input-line: #8a8a8a;
@@ -74,7 +76,9 @@ html.dark {
   --time-text: #b0b0b0;
   --tooltip-bg: #ccc6c6;
   --tooltip-text: #121212;
-  --tab-shadow: rgba(0, 0, 0, 0.7);
+  --tab-shadow: rgba(0, 0, 0, 1);
+  --tab-shadow-blur: 15px;
+  --tab-text: #ffffff;
   --icon-off-fill: #8f8f8f;
   --icon-off-stroke: #5a5a5a;
 }
@@ -138,6 +142,12 @@ button { font-family: inherit; color: inherit; }
 }
 
 .icon-btn[disabled] { cursor: default; }
+
+/* Dark mode: moon icon colors are swapped (dark fill, white outline) */
+html.dark #darkToggle svg {
+  fill: var(--icon-stroke);
+  color: var(--icon-fill);
+}
 
 /* DISABLED ICONS */
 .icon-btn--off {
@@ -281,7 +291,8 @@ html.dark .menu-item:hover { background: rgba(255, 255, 255, 0.08); }
   border-radius: 18px 18px 0 0;
   font-size: 20px;
   cursor: pointer;
-  box-shadow: 0 0 12px var(--tab-shadow);   /* cuts off shadow at the bottom */
+  color: var(--tab-text);
+  box-shadow: 0 0 var(--tab-shadow-blur) var(--tab-shadow);   /* cuts off shadow at the bottom */
   clip-path: inset(-30px -30px 0 -30px);
   transition: height 220ms ease, font-size 220ms ease;
 }
@@ -565,6 +576,10 @@ html.dark .menu-item:hover { background: rgba(255, 255, 255, 0.08); }
 
 .week:hover, .dates:hover { background: var(--hover-bg); }
 
+/* On the Registration tab the schedule isn't a link: no pointer, no hover color */
+body:has(#panel-registration:not([hidden])) .week { cursor: default; }
+body:has(#panel-registration:not([hidden])) .week:hover { background: none; }
+
 .week-head {
   display: grid;
   grid-template-columns: 34px repeat(5, 1fr);
@@ -610,7 +625,42 @@ html.dark .menu-item:hover { background: rgba(255, 255, 255, 0.08); }
   right: 1px;
   border-radius: 4px;
   z-index: 1;
+  overflow: hidden;
+  padding: 1px 3px;
+  color: #1a1a1a;
+  font-size: clamp(8px, 0.5vw, 10px);
+  font-weight: 500;
+  line-height: 1.15;
 }
+
+.event span {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-room { font-weight: 400; }
+
+/* Empty schedule message, laid over the grid */
+.week-wrap { position: relative; }
+
+.week-empty {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  background: color-mix(in srgb, var(--box-bg) 70%, transparent);
+  font-size: clamp(15px, 1vw, 18px);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.week-empty[hidden] { display: none; }
 
 .dates {
   border-top: 2px solid var(--border);
@@ -647,6 +697,156 @@ html.dark .menu-item:hover { background: rgba(255, 255, 255, 0.08); }
   font-weight: 700;
 }
 .reg-box a { color: inherit; }
+
+/* DOWNLOADED SCHEDULE IMAGE
+   Built off-screen, always in light colors, larger than the sidebar version */
+.export-sheet {
+  position: fixed;
+  top: 0;
+  left: -10000px;
+  width: 1400px;
+  --box-bg: #ffffff;
+  --border: #000000;
+  --grid-line: #c8c8c8;
+  --grid-dash: #999999;
+  --grid-axis: #555555;
+  --time-text: #444444;
+  background: #ffffff;
+  color: #000000;
+  font-family: 'Roboto', sans-serif;
+}
+
+.export-sheet .week-head { grid-template-columns: 70px repeat(5, 1fr); font-size: 30px; line-height: 52px; }
+.export-sheet .week-body { grid-template-columns: 70px repeat(5, 1fr); }
+.export-sheet .time-label { font-size: 14px; left: 8px; }
+.export-sheet .event {
+  font-size: 14px;       /* text size in the downloaded image's class blocks */
+  line-height: 1.5;      /* space between lines (1.5 = 1.5x the text size) */
+  padding: 6px 8px;
+  border-radius: 0;      /* square corners */
+  left: 3px;
+  right: 3px;
+}
+
+/* downloaded image block: COURSE NAME / - SUBJ #### - / time / room */
+.export-sheet .event span { white-space: normal; overflow: visible; }
+.export-sheet .event-title { font-weight: 700; }
+.export-sheet .event-number,
+.export-sheet .event-time { font-weight: 400; }
+.export-sheet .event-room { font-weight: 400; text-decoration: underline; }
+
+/* REGISTRATION: HOLDS */
+.holds-line { margin: 0; font-size: 20px; font-weight: 300; }
+
+.holds-line a.holds-count {
+  color: var(--red-text);
+  font-weight: 700;
+}
+
+/* REGISTRATION: CRN BUILDER */
+.section-title--with-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* info tooltip that opens to the left (for icons at the right edge) */
+.info--left .info-tip {
+  left: auto;
+  right: calc(100% + 10px);
+}
+
+.term { color: var(--muted); font-size: 0.6em; }
+
+.builder-help { margin: 0 0 18px; font-size: 17px; font-weight: 300; }
+
+.crn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.crn-input {
+  flex: 1;
+  min-width: 220px;
+  max-width: 480px;
+  padding: 10px 14px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: var(--box-bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 17px;
+}
+
+.builder-btn {
+  padding: 10px 18px;
+  border: 1.5px solid var(--btn-border);
+  border-radius: 8px;
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.builder-btn:hover { filter: brightness(0.94); }
+.builder-btn:disabled { opacity: 0.6; cursor: wait; }
+
+.builder-btn--download { margin-left: auto; }   /* pushed to the right end of the row */
+.builder-btn:disabled:not(.builder-btn--primary) { cursor: not-allowed; }
+
+.builder-btn--primary {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+
+.crn-message {
+  max-width: 720px;
+  margin-bottom: 20px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-left: 5px solid;
+  background: var(--box-bg);
+  font-size: 16px;
+}
+
+.crn-message ul { margin: 6px 0 0; padding-left: 20px; }
+.crn-message--error { border-color: var(--red-text); }
+.crn-message--success { border-color: #3a9a4a; }
+.crn-message--info { border-color: var(--muted); }
+
+.builder-subtitle { margin: 10px 0 12px; font-size: 22px; font-weight: 500; }
+
+.course-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 720px;
+}
+
+.course-list li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--grid-line);
+}
+
+.course-swatch {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-top: 3px;
+  border-radius: 4px;
+}
+
+.course-name { font-size: 17px; }
+.course-times { color: var(--muted); font-size: 14px; margin-top: 2px; }
+.course-list .course-empty { color: var(--muted); border-bottom: 0; }
 
 /* TABS */
 .placeholder {
@@ -792,4 +992,4 @@ body:has(#panel-registration:not([hidden])) .apps { display: none; }
   width: 34px;
   height: 34px;
   stroke-width: 1.8;
-} 
+}
