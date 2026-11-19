@@ -999,3 +999,64 @@ body:has(#panel-registration:not([hidden])) .apps { display: none; }
   height: 34px;
   stroke-width: 1.8;
 }
+/* ============ MOBILE / NARROW SCREENS (900px wide and below) ============
+   The sidebar moves below the main content instead of sitting beside it,
+   and the whole page scrolls normally instead of only the card area. */
+@media (max-width: 900px) {
+  :root { --side-margin: 16px; }
+
+  /* whole page scrolls */
+  body { height: auto; min-height: 100vh; overflow: visible; }
+
+  /* header: smaller logo and icons */
+  .topbar { height: 72px; }
+  .logo { height: 44px; }
+  .header-actions { gap: 14px; }
+  .header-actions .icon-btn svg { width: 24px; height: 24px; }
+  .avatar { width: 34px; height: 34px; font-size: 18px; border-width: 2px; }
+  .profile-menu { right: 0; }
+
+  /* tabs on one row, search bar on its own row below them */
+  .toolbar { flex-wrap: wrap; gap: 12px; padding-top: 16px; }
+  .tabs { order: 1; flex: 1 1 100%; gap: 10px; max-width: none; padding-top: 12px; height: calc(var(--tab-height-active) + 12px); }
+  .tab { font-size: 15px; padding: 0 4px; white-space: nowrap; }
+  .tab.active { font-size: 17px; }
+  .search { order: 0; width: 100%; margin-bottom: 0; }
+
+  /* content first, sidebar stacked underneath at full width */
+  .main { display: block; margin-top: 16px; }
+  .content { overflow: visible; padding: 16px var(--side-margin) 24px; }
+  .sidebar {
+    width: auto;
+    overflow: visible;
+    border-left: 0;
+    border-top: 2px solid var(--border);
+    padding: 20px var(--side-margin) 100px;   /* bottom room so the feedback button doesn't cover the last box */
+  }
+
+  /* sections and cards: one card per row */
+  .section { margin-bottom: 36px; }
+  .section-title { font-size: 26px; margin-bottom: 20px; }
+  .card-grid { grid-template-columns: 1fr; gap: 18px; }
+
+  /* tooltips can't be wider than the phone */
+  .info-tip { max-width: min(320px, 70vw); white-space: normal; }
+
+  /* Registration tab */
+  .crn-input { min-width: 0; max-width: none; flex: 1 1 100%; }
+  .builder-btn { flex: 1 1 auto; font-size: 15px; padding: 10px 12px; }
+  .builder-btn--download { margin-left: 0; }
+  .holds-line, .builder-help { font-size: 16px; }
+  .term { white-space: nowrap; }   /* keep "(Fall 2026)" together */
+
+  /* Student Resources tab */
+  .resources-header h1 { font-size: 30px; }
+  .resources-header p { font-size: 16px; }
+  .resource-group { margin-left: 0; }
+  .resource-group h2 { font-size: 26px; }
+  .resource-group li { font-size: 17px; line-height: 1.7; }
+
+  /* feedback button: smaller, closer to the corner */
+  .fab { width: 50px; height: 50px; right: 16px; bottom: 16px; }
+  .fab svg { width: 28px; height: 28px; }
+}
